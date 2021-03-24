@@ -1,0 +1,43 @@
+.backButton
+{
+  position: absolute;
+  left: 10px;
+  top: 10px;
+}
+
+#sidebar
+{
+  width: 30vw;
+  margin-left: auto;
+  height: 99vh;
+  border-right-style: solid;
+}
+
+#mainbar
+{
+  width: 70vw;
+  margin-right: auto;
+  height: 99vh;
+}
+
+#sidebar.lightmode
+{
+  background-color: rgba(0,0,0,.1);
+  border-color: black;
+}
+
+#mainbar.lightmode
+{
+  background-color: rgba(0,0,0,.1);
+}
+
+#sidebar.darkmode
+{
+  background-color: rgba(255,255,255,.2);
+  border-color: white;
+}
+
+#mainbar.darkmode
+{
+  background-color: rgba(255,255,255,.2);
+}

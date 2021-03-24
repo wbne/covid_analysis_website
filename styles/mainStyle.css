@@ -1,0 +1,76 @@
+body
+{
+  text-align: center;
+}
+
+#tooltip
+{
+  display: block;
+  height: 100%;
+  color: rgba(0,0,0,0);
+  background-color: rgba(0,0,0,0);
+}
+
+#tooltip:hover.lightmode
+{
+    color: black;
+    background-color: rgba(0,0,0,.5);
+}
+
+#tooltip:hover.darkmode
+{
+    color: white;
+    background-color: rgba(255,255,255,.5);
+}
+
+#temporal
+{
+  background-image: url("./temporalImg.png");
+}
+
+#geographical
+{
+  background-image: url("./geographicalImg.png");
+}
+
+#textual
+{
+  background-image: url("./textualImg.png");
+}
+
+.wrapper
+{
+  width: 100%;
+  display: flex;
+  height: 70vh;
+}
+
+.option
+{
+  margin: 10px;
+  width: 30%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+}
+
+.lightmode
+{
+  background: white;
+  color: black;
+}
+
+.darkmode
+{
+  background: black;
+  color: white;
+}
+
+.modeToggle
+{
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
