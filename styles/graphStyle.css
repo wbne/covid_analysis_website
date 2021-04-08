@@ -27,13 +27,13 @@
 
 #sidebar.lightmode
 {
-  background-color: rgba(0,0,0,.1);
+  background-color: white;
   border-color: black;
 }
 
 #mainbar.lightmode
 {
-  background-color: rgba(0,0,0,.1);
+  background-color: white;
 }
 
 #sidebar.darkmode
@@ -45,4 +45,18 @@
 #mainbar.darkmode
 {
   background-color: rgba(255,255,255,.2);
+}
+
+.nextPage
+{
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+
+.backPage
+{
+  position: absolute;
+  left: 31vw;
+  bottom: 10px;
 }

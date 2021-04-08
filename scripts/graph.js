@@ -17,26 +17,68 @@ var svg
 var count
 var xAxisVar
 var webName
+var data
+var datafile
+var testtestCount = 0
+var filenames = ["date.agg.proportions.counts.csv","cdc.date.agg.proportions.counts.csv","cdc.date.agg.proportions.counts.csv"]
+var displayNames = ["Covid-19 Dataset", "CDC Subset", "CDC Stages"];
 
 window.addEventListener('load', (event) => {
   var path = window.location.pathname;
   webName = path.split("/").pop();
-  loadFile()
+  preloadFile()
 });
+
+function preloadFile()
+{
+  if(webName == "temporal.html")
+  {
+    datafile = "date.agg.proportions.counts.csv";
+    document.getElementsByClassName("nextPage")[0].textContent = "CDC Dataset"
+    document.getElementsByClassName("backPage")[0].style.visibility = 'hidden';
+  }
+  else
+  {
+    datafile = "flair.joined.tweets.csv";
+  }
+  loadFile()
+}
+
+function nextFile()
+{
+  testtestCount++;
+  datafile = filenames[testtestCount];
+  if(testtestCount == displayNames.length - 1){document.getElementsByClassName("nextPage")[0].style.visibility = 'hidden';}
+  else{document.getElementsByClassName("nextPage")[0].textContent = displayNames[testtestCount - 1];}
+  document.getElementsByClassName("nextPage")[0].textContent = displayNames[testtestCount + 1]
+  document.getElementsByClassName("backPage")[0].textContent = displayNames[testtestCount - 1]
+  document.getElementsByClassName("backPage")[0].style.visibility = '';
+  loadFile();
+}
+
+function prevFile()
+{
+  testtestCount--;
+  datafile = filenames[testtestCount];
+  if(testtestCount == 0){document.getElementsByClassName("backPage")[0].style.visibility = 'hidden';}
+  else{document.getElementsByClassName("backPage")[0].textContent = displayNames[testtestCount - 1];}
+  document.getElementsByClassName("nextPage")[0].textContent = displayNames[testtestCount + 1]
+  document.getElementsByClassName("nextPage")[0].style.visibility = '';
+  loadFile();
+}
 
 function loadFile()
 {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-      //console.log(this.responseText);
       rawText = this.responseText;
       var div = document.getElementById('variables')
       while(div.firstChild){div.removeChild(div.firstChild)}
       loadVariables()
     }
   };
-  xhttp.open("GET", "./scripts/flair.joined.tweets.csv", true);
+  xhttp.open("GET", "./scripts/" + datafile, true);
   xhttp.send();
 }
 
@@ -46,7 +88,8 @@ function checkCheckbox()
   selectedValue = 0
   cbCount = 0
   cbs = document.querySelectorAll('#varOption');
-  xAxisVar = document.getElementsByClassName("dropdown")[0].value
+  if(webName != "temporal.html")
+  {xAxisVar = document.getElementsByClassName("dropdown")[0].value}
   selectedData = []
  for (const cb of cbs)
  {
@@ -92,22 +135,20 @@ function loadVariables()
   data = d3.csvParse(rawText)
   count = data.columns.length
   container = document.getElementById("variables")
-  indices = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+  start = 0;
   if(webName == "temporal.html")
-  {
-    indices = [0,1,2,3,4,5,15];
-  }
-  for(i = 0; i < indices.length; i++)
+  {start = 2;}
+  for(i = start; i < count; i++)
   {
     lab = document.createElement('label')
-    lab.textContent = data.columns[indices[i]]
+    lab.textContent = data.columns[i]
     lab.setAttribute("class", "checkLabel")
     spa = document.createElement('span')
     spa.setAttribute("class", "checkSpan")
     box = document.createElement('input')
     box.setAttribute('type', 'checkbox')
     box.setAttribute('id', 'varOption')
-    box.setAttribute('name', indices[i])
+    box.setAttribute('name', i)
     box.onclick = checkCheckbox
     lab.append(box)
     lab.append(spa)
@@ -121,9 +162,12 @@ function loadVariables()
 function showDropdown() {
   var dropdowns = document.getElementsByClassName("dropdown")
   var dropdownLength = dropdowns[0].options.length
-  for(var i = dropdownLength - 1; i >= 0; i--)
+  start = 0;
+  if(webName == "temporal.html")
+  {start = 2;}
+  for(var i = dropdownLength - 1; i >= start; i--)
     {dropdowns[0].options[i] = null}
-  for (var i = 0; i < count; i++)
+  for (var i = start; i < count; i++)
   {
     lab = document.createElement('option')
     lab.textContent = data.columns[i]
@@ -134,7 +178,9 @@ function showDropdown() {
 
 function clearGraphs()
 {
-  xAxisVar = document.getElementsByClassName("dropdown")[0].selectedIndex
+  if(webName != "temporal.html")
+  {xAxisVar = document.getElementsByClassName("dropdown")[0].selectedIndex}
+
   d3.select(g).html("")
   d3.select("#legend").html("")
   //console.log(selectedData)
@@ -148,15 +194,10 @@ function clearGraphs()
             "translate(" + margin.left + "," + margin.top + ")");
 }
 
-function pleasestoplagging()
-{
-  data = ""
-}
-
 function boxplot()
 {
   clearGraphs()
-  var data = d3.csvParse(rawText)
+  //var data = d3.csvParse(rawText)
 
   var max = d3.max(data, function(d) {return +d[data.columns[selectedData]]})
   var min = d3.min(data, function(d) {return +d[data.columns[selectedData]]})
@@ -213,7 +254,7 @@ function barplot()
 {
   clearGraphs()
 
-data = d3.csvParse(rawText)
+//data = d3.csvParse(rawText)
 var x = d3.scaleBand()
   .range([ 0, width ])
   .domain(data.map(function(d) { return d[data.columns[xAxisVar]]; }))
@@ -256,7 +297,7 @@ function dotplot()
 {
   clearGraphs()
 
-    data = d3.csvParse(rawText)
+    //data = d3.csvParse(rawText)
     var x = d3.scaleLinear()
       .domain([0, d3.max(data, function(d) {return +d[data.columns[xAxisVar]]} )])
       .range([ 0, width ]);
@@ -356,12 +397,14 @@ function draw(words) {
 }
 }
 
+var xAxis, x, area, areaGenerator, brush, idleTimeout, tempColors;
+
 function streamline()
 {
   clearGraphs()
 
   // create a tooltip
-    var Tooltip = d3.select("#graphArea")
+    var Tooltip = d3.select(g)
       .append("div")
       .style("opacity", 0)
       .attr("class", "tooltip")
@@ -394,7 +437,7 @@ function streamline()
     }
 
 // Parse the Data
-data = d3.csvParse(rawText)
+//data = d3.csvParse(rawText)
 
   // List of groups = header of the csv files
   var keys = []
@@ -404,30 +447,21 @@ data = d3.csvParse(rawText)
   total_max = 0
   for(i = 0; i < selectedData.length; i++)
   {total_max += d3.max(data, function(d) {return +d[data.columns[selectedData[i]]]})}
-  max_time = d3.max(data, function(d) {return +d[data.columns[xAxisVar]]})
-  min_time = d3.min(data, function(d) {return +d[data.columns[xAxisVar]]})
-  avg_time = (max_time + min_time) / 2
-  q1 = (min_time+avg_time)/2
-  q3 = (max_time+avg_time)/2
-  o1 = (min_time+q1)/2
-  o2 = (q1+avg_time)/2
-  o3 = (q3+avg_time)/2
-  o4 = (max_time+q3)/2
+  max_time = d3.max(data, function(d) {return d3.timeParse("%Y-%m-%d")(d.date);})
+  min_time = d3.min(data, function(d) {return d3.timeParse("%Y-%m-%d")(d.date);})
 
   // Add X axis
-  var x = d3.scaleLinear()
-    .domain([min_time, max_time])
+  x = d3.scaleTime()
+    .domain(d3.extent(data, function(d) {return d3.timeParse("%Y-%m-%d")(d.date); }))
     .range([ 0, width ]);
-  svg.append("g")
+  xAxis = svg.append("g")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).tickSize(-height).tickValues([min_time, o1, q1, o2, avg_time, o3, q3, o4, max_time]))
-    .select(".domain").remove()
-  svg.selectAll(".tick line").attr("stroke", "#b8b8b8")
-  svg.append("text")
-    .attr("text-anchor", "end")
-    .attr("x", width)
-    .attr("y", height+30 )
-    .text(""+data.columns[xAxisVar])
+    .call(d3.axisBottom(x).ticks(5));
+    svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("x", width)
+      .attr("y", height+30 )
+      .text("Time",height+40 )
   // Add Y axis
   var y = d3.scaleLinear()
     .domain([-.5*total_max, .5*total_max])
@@ -476,20 +510,105 @@ data = d3.csvParse(rawText)
   }
 
   // Show the areas
-  svg
-    .selectAll("mylayers")
-    .data(stackedData)
-    .enter()
-    .append("path")
-      .style("fill", function(d) { return color(d.key); })
-      .attr("d", d3.area()
-        .x(function(d, i) { return x(d.data[data.columns[xAxisVar]]); })
-        .y0(function(d) { return y(d[0]); })
-        .y1(function(d) { return y(d[1]); })
-    )
+  /*
     .on("mouseover", mouseover)
     .on("mousemove", mousemove)
-    .on("mouseleave", mouseleave)
+    .on("mouseleave", mouseleave)*/
+
+    // Add a clipPath: everything out of this area won't be drawn.
+    var clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width )
+        .attr("height", height )
+        .attr("x", 0)
+        .attr("y", 0);
+
+    // Add brushing
+    brush = d3.brushX()                   // Add the brush feature using the d3.brush function
+        .extent( [ [0,0], [width,height] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+        .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
+
+    // Create the area variable: where both the area and the brush take place
+    area = svg.append('g')
+      .attr("clip-path", "url(#clip)")
+
+    // Create an area generator
+    areaGenerator = []
+    for(i = 0; i < keys.length; i++)
+    {
+    // Create an area generator
+    testCount = 0
+    testIndex = 0
+    areaGenerator.push(d3.area()
+      .x(function(d) { if(testCount == stackedData[i].length){testIndex = (testIndex+1)%stackedData.length} testCount = testCount % stackedData[i].length;  return x(d3.timeParse("%Y-%m-%d")(d.date)) })
+      .y0(function(d) { testCount++; return y(stackedData[testIndex][testCount - 1][0]) })
+      .y1(function(d) { return y(stackedData[testIndex][testCount - 1][1]) })
+      )
+    }
+
+    for(i = 0; i < keys.length; i++)
+    {// Add the area
+      area.append("path")
+      .datum(data)
+      .attr("class", "myArea")  // I add the class myArea to be able to modify it later on.
+      .attr("stroke", function(d){ return tempColors[i] })
+      .attr("fill", function(d){return tempColors[i] })
+      .attr("stroke-width", 1)
+      .attr("d", areaGenerator[i] )
+    }
+    // Add the brushing
+    svg
+      .append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+    // If user double click, reinitialize the chart
+    svg.on("dblclick",function(){
+      x.domain(d3.extent(data, function(d) { return (d3.timeParse("%Y-%m-%d")(d.date)) }))
+      xAxis.transition().call(d3.axisBottom(x).ticks(5));
+      area.selectAll(".myArea").remove()
+      for(i = 0; i < areaGenerator.length; i++){
+        area.append("path")
+        .datum(data)
+        .attr("class", "myArea")  // I add the class myArea to be able to modify it later on.
+        .attr("stroke", function(d){ return tempColors[i] })
+        .attr("fill", function(d){return tempColors[i] })
+        .attr("stroke-width", 1)
+        .attr("d", areaGenerator[i] )}
+    });
+
+}
+
+function idled() { idleTimeout = null; }
+
+// A function that update the chart for given boundaries
+function updateChart() {
+
+  // What are the selected boundaries?
+  extent = d3.event.selection
+
+  // If no selection, back to initial coordinate. Otherwise, update X axis domain
+  if(!extent){
+    if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+    x.domain([ 4,8])
+  }else{
+    x.domain([ x.invert(extent[0]), x.invert(extent[1]) ])
+    svg.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
+  }
+
+xAxis.call(d3.axisBottom(x))
+area.selectAll(".myArea").remove()
+  for(i = 0; i < areaGenerator.length; i++)
+  {// Update axis and area position
+      area.append("path")
+      .datum(data)
+      .attr("class", "myArea")  // I add the class myArea to be able to modify it later on.
+      .attr("stroke", function(d){ return tempColors[i] })
+      .attr("fill", function(d){return tempColors[i] })
+      .attr("stroke-width", 1)
+      .attr("d", areaGenerator[i] )
+  }
 
 }
 
@@ -502,9 +621,8 @@ function stacked()
 function linegraph()
 {
   clearGraphs()
-
 //Read the data
-data = d3.csvParse(rawText)
+//data = d3.csvParse(rawText)
 
 // List of groups = header of the csv files
 var keys = []
@@ -518,8 +636,6 @@ for(i = 0; i < selectedData.length; i++)
   if(total_max < tmep)
   {total_max = tmep}
 }
-max_time = d3.max(data, function(d) {return +d[data.columns[xAxisVar]]})
-min_time = d3.min(data, function(d) {return +d[data.columns[xAxisVar]]})
 
 // colors
 tempColors = []
@@ -528,17 +644,17 @@ for(i = 0; i < keys.length; i++)
   tempColors.push("rgba("+ Math.round(Math.random()*128+128)+","+Math.round(Math.random()*128+128)+","+Math.round(Math.random()*128+128)+",.9)")
 }
   // Add X axis
-  var x = d3.scaleLinear()
-    .domain(d3.extent(data, function(d) {return +d[data.columns[xAxisVar]]; }))
+  x = d3.scaleTime()
+    .domain(d3.extent(data, function(d) {return d3.timeParse("%Y-%m-%d")(d.date); }))
     .range([ 0, width ]);
-  svg.append("g")
+  xAxis = svg.append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x).ticks(5));
     svg.append("text")
       .attr("text-anchor", "end")
       .attr("x", width)
       .attr("y", height+30 )
-      .text(""+data.columns[xAxisVar])
+      .text("Time")
 
   // Add Y axis
   var y = d3.scaleLinear()
@@ -546,22 +662,11 @@ for(i = 0; i < keys.length; i++)
     .range([ height, 0 ]);
   svg.append("g")
     .call(d3.axisLeft(y));
-
-  // Draw the line
-  for(i = 0; i < keys.length; i++)
-  {
-  svg.selectAll(".line")
-      .data([data])
-      .enter()
-      .append("path")
-        .attr("d", d3.line()
-          .x(function(d){return x(+d[data.columns[xAxisVar]]) })
-          .y(function(d){return y(+d[data.columns[selectedData[i]]]) })
-      )
-        .attr("fill", "none")
-        .attr("stroke", function(d){ return tempColors[i] })
-        .attr("stroke-width", 3)
-  }
+  svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", 0)
+    .attr("y", 0 )
+    .text("Percentage")
 
   divlegend = document.getElementById("legend")
   for(i = 0; i < selectedData.length; i++)
@@ -574,6 +679,64 @@ for(i = 0; i < keys.length; i++)
 
     divlegend.append(legend)
   }
+
+  // Add a clipPath: everything out of this area won't be drawn.
+  var clip = svg.append("defs").append("svg:clipPath")
+      .attr("id", "clip")
+      .append("svg:rect")
+      .attr("width", width )
+      .attr("height", height )
+      .attr("x", 0)
+      .attr("y", 0);
+
+  // Add brushing
+  brush = d3.brushX()                   // Add the brush feature using the d3.brush function
+      .extent( [ [0,0], [width,height] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
+      .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
+
+  // Create the area variable: where both the area and the brush take place
+  area = svg.append('g')
+    .attr("clip-path", "url(#clip)")
+areaGenerator = []
+  for(i = 0; i < keys.length; i++)
+  {
+  // Create an area generator
+  areaGenerator.push(d3.area()
+    .x(function(d) { return x(d3.timeParse("%Y-%m-%d")(d.date)) })
+    .y0(function(d) { return y(d[data.columns[selectedData[i]]]) })
+    .y1(function(d) { return y(d[data.columns[selectedData[i]]]) })
+    )
+  }
+
+  for(i = 0; i < keys.length; i++)
+  {// Add the area
+    area.append("path")
+    .datum(data)
+    .attr("class", "myArea")  // I add the class myArea to be able to modify it later on.
+    .attr("stroke", function(d){ return tempColors[i] })
+    .attr("stroke-width", 1)
+    .attr("d", areaGenerator[i] )
+  }
+  // Add the brushing
+  area
+    .append("g")
+      .attr("class", "brush")
+      .call(brush);
+
+  // If user double click, reinitialize the chart
+  svg.on("dblclick",function(){
+    x.domain(d3.extent(data, function(d) { return (d3.timeParse("%Y-%m-%d")(d.date)) }))
+    xAxis.transition().call(d3.axisBottom(x).ticks(5));
+    area.selectAll(".myArea").remove()
+    for(i = 0; i < areaGenerator.length; i++){
+      area.append("path")
+      .datum(data)
+      .attr("class", "myArea")  // I add the class myArea to be able to modify it later on.
+      .attr("stroke", function(d){ return tempColors[i] })
+      .attr("stroke-width", 1)
+      .attr("d", areaGenerator[i] )}
+  });
+
 }
 
 var link, node, edgepaths;

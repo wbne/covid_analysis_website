@@ -13,8 +13,8 @@
   <body class="lightmode">
     <div class="wrapper">
       <div id="sidebar" class="lightmode">
+      </h1>Options</h1>
         <div id="variables"></div>
-      <select class="dropdown" onmouseup="checkCheckbox()"></select>
     <br>
       <button onclick="boxplot()">boxplot</button>
       <button onclick="dotplot()">dotplot</button>
@@ -25,8 +25,9 @@
       <div id="legend"></div>
       </div>
       <div id="mainbar" class="lightmode">
-
       </div>
+      <button class="nextPage" onclick="nextFile()"></button>
+      <button class="backPage" onclick="prevFile()"></button>
     </div>
     <button onclick="changeModes()" class="modeToggle">Light/Dark Mode</button>
     <a href="./index.html" class="backButton"><button>go back</button></a>
