@@ -2,10 +2,11 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>Temporal</title>
+    <title>Textual</title>
     <link rel="stylesheet" href="./styles/mainStyle.css">
     <link rel="stylesheet" href="./styles/graphStyle.css">
     <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
     <script type="text/javascript" src="./scripts/lightbulb.js"></script>
     <script type="text/javascript" src="./scripts/graph.js"></script>
   </head>
@@ -13,11 +14,15 @@
     <div class="wrapper">
       <div id="sidebar" class="lightmode">
       <h1>Options</h1>
-      <button onclick="percentages()">Percentages</button>
+      <button onclick="wordStage('all')">All Words</button>
       </br>
-      <button onclick="numbers()">Numbers</button>
+      <button onclick="wordStage(1)">Stage 1 Words</button>
       </br>
-      <button>Total Count</button>
+      <button onclick="wordStage(2)">Stage 2 Words</button>
+      </br>
+      <button onclick="wordStage(3)">Stage 3 Words</button>
+      </br>
+      <button onclick="wordStage(4)">Stage 4 Words</button>
       </br>
       <button class="nextPage" onclick="nextFile()"></button>
       <button class="backPage" onclick="prevFile()"></button>
@@ -25,7 +30,6 @@
       </div>
       <div id="mainbar" class="lightmode">
       </div>
-
     </div>
     <button onclick="changeModes()" class="modeToggle"><image src="../styles/light_dark_mode.png" id="lightdark"></image></button>
     <a href="./index.html" class="backButton"><image src="../styles/home_icon.png" id="home"></image></a>

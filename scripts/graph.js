@@ -20,8 +20,10 @@ var webName
 var data
 var datafile
 var testtestCount = 0
-var filenames = ["date.agg.proportions.counts.csv","cdc.date.agg.proportions.counts.csv","cdc.date.agg.proportions.counts.csv"]
-var displayNames = ["Covid-19 Dataset", "CDC Subset", "CDC Stages"];
+var filenames = []
+var filenamesTemporal = ["date.agg.proportions.counts.csv","cdc.date.agg.proportions.counts.csv","cdc.date.agg.proportions.counts.csv"]
+var filenamesTextual = ["c19.words.tfidf_values.csv", "cdc.words.tfidf_values.csv"]
+var displayNames = ["Covid-19 Dataset", "CDC Dataset"];
 
 window.addEventListener('load', (event) => {
   var path = window.location.pathname;
@@ -34,13 +36,19 @@ function preloadFile()
   if(webName == "temporal.html")
   {
     datafile = "date.agg.proportions.counts.csv";
-    document.getElementsByClassName("nextPage")[0].textContent = "CDC Dataset"
-    document.getElementsByClassName("backPage")[0].style.visibility = 'hidden';
+    filenames = filenamesTemporal
+  }
+  else if(webName == "textual.html")
+  {
+    datafile = "c19.words.tfidf_values.csv";
+    filenames = filenamesTextual
   }
   else
   {
     datafile = "flair.joined.tweets.csv";
   }
+  document.getElementsByClassName("nextPage")[0].textContent = "CDC Dataset"
+  document.getElementsByClassName("backPage")[0].style.display = 'none';
   loadFile()
 }
 
@@ -48,11 +56,11 @@ function nextFile()
 {
   testtestCount++;
   datafile = filenames[testtestCount];
-  if(testtestCount == displayNames.length - 1){document.getElementsByClassName("nextPage")[0].style.visibility = 'hidden';}
+  if(testtestCount == displayNames.length - 1){document.getElementsByClassName("nextPage")[0].style.display = 'none';}
   else{document.getElementsByClassName("nextPage")[0].textContent = displayNames[testtestCount - 1];}
   document.getElementsByClassName("nextPage")[0].textContent = displayNames[testtestCount + 1]
   document.getElementsByClassName("backPage")[0].textContent = displayNames[testtestCount - 1]
-  document.getElementsByClassName("backPage")[0].style.visibility = '';
+  document.getElementsByClassName("backPage")[0].style.display = '';
   loadFile();
 }
 
@@ -60,22 +68,25 @@ function prevFile()
 {
   testtestCount--;
   datafile = filenames[testtestCount];
-  if(testtestCount == 0){document.getElementsByClassName("backPage")[0].style.visibility = 'hidden';}
+  if(testtestCount == 0){document.getElementsByClassName("backPage")[0].style.display = 'none';}
   else{document.getElementsByClassName("backPage")[0].textContent = displayNames[testtestCount - 1];}
   document.getElementsByClassName("nextPage")[0].textContent = displayNames[testtestCount + 1]
-  document.getElementsByClassName("nextPage")[0].style.visibility = '';
+  document.getElementsByClassName("nextPage")[0].style.display = '';
   loadFile();
 }
 
 function loadFile()
 {
+  clearGraphs()
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       rawText = this.responseText;
       var div = document.getElementById('variables')
-      while(div.firstChild){div.removeChild(div.firstChild)}
-      loadVariables()
+      //while(div.firstChild){div.removeChild(div.firstChild)}
+      data = d3.csvParse(rawText)
+      count = data.columns.length
+      //loadVariables()
     }
   };
   xhttp.open("GET", "./scripts/" + datafile, true);
@@ -88,7 +99,7 @@ function checkCheckbox()
   selectedValue = 0
   cbCount = 0
   cbs = document.querySelectorAll('#varOption');
-  if(webName != "temporal.html")
+  if(webName == "templateGraphSite.html")
   {xAxisVar = document.getElementsByClassName("dropdown")[0].value}
   selectedData = []
  for (const cb of cbs)
@@ -132,8 +143,6 @@ function uncheckCheckbox(checkers)
 
 function loadVariables()
 {
-  data = d3.csvParse(rawText)
-  count = data.columns.length
   container = document.getElementById("variables")
   start = 0;
   if(webName == "temporal.html")
@@ -176,9 +185,38 @@ function showDropdown() {
   }
 }
 
+var tempStrings
+function percentages()
+{
+  selectedData = [];
+  tempStrings = [count - 6, count - 5, count - 4];
+  testythetester()
+}
+
+function numbers()
+{
+  selectedData = []
+  tempStrings = [count - 3, count - 2, count - 1]
+  testythetester()
+}
+
+function testythetester()
+{
+  for(var i = 0; i < tempStrings.length; i++)
+  {selectedData.push(tempStrings[i]);}
+  linegraph();
+}
+
+var stage;
+function wordStage(stagePicked)
+{
+  stage = stagePicked
+  wordcloud()
+}
+
 function clearGraphs()
 {
-  if(webName != "temporal.html")
+  if(webName == "templateGraphSite.html")
   {xAxisVar = document.getElementsByClassName("dropdown")[0].selectedIndex}
 
   d3.select(g).html("")
@@ -337,30 +375,30 @@ function wordcloud()
 
   // List of words
 data = d3.csvParse(rawText)
+
 joinedText = ""
-for(i = 0; i < 1000; i++)
+for(i = 0; i < data.length; i++)
 {
-  joinedText += (data[i][data.columns[selectedData[0]]] + ' ')
+  if(stage == "all" || data[i].stage == stage)
+  {joinedText += (data[i].word + ' ')}
 }
+
 var myWords = joinedText
   .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]\']/g,"")
   .replace(/\s\s+/g, ' ')
   .split(" ")
 var freqMap = {}
+var wordCount = 0
   myWords.forEach(function(w) {
     if (!freqMap[w]) {
             freqMap[w] = 0;
         }
-        freqMap[w] += 1;
+        freqMap[w] += data[wordCount].tfidf;
+        wordCount++
+        //console.log(data[wordCount].tfidf)
   })
 
-var orig = {}
-myWords.forEach(function(w){
-  if(!orig[w]) {
-    orig[w] = 1
-  }
-})
-myWords = Object.keys(orig)
+myWords = Object.keys(freqMap)
 
 // set the dimensions and margins of the graph
 var margin = {top: 10, right: 10, bottom: 10, left: 10},
@@ -370,7 +408,7 @@ var margin = {top: 10, right: 10, bottom: 10, left: 10},
 // Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
 var layout = d3.layout.cloud()
   .size([width, height])
-  .words(myWords.map(function(d) { return {text: d, size: (freqMap[d] * 5), color: [Math.random()*128+64, Math.random()*128+64, Math.random()*128+64]}; }))
+  .words(myWords.map(function(d) { return {text: d, size: (freqMap[d] * 5), color: [0, 0, 0]}; }))
   .padding(3)
   .fontSize(function(d) {return d.size})
   .font("Comic Sans MS")
