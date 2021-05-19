@@ -91,6 +91,7 @@ function loadFile()
   };
   xhttp.open("GET", "./scripts/" + datafile, true);
   xhttp.send();
+  document.getElementById("currentFile").textContent = "Current File: " + datafile
 }
 
 function checkCheckbox()
@@ -197,6 +198,13 @@ function numbers()
 {
   selectedData = []
   tempStrings = [count - 3, count - 2, count - 1]
+  testythetester()
+}
+
+function totalCount()
+{
+  selectedData = []
+  tempStrings = [count - 7]
   testythetester()
 }
 
@@ -408,7 +416,7 @@ var margin = {top: 10, right: 10, bottom: 10, left: 10},
 // Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
 var layout = d3.layout.cloud()
   .size([width, height])
-  .words(myWords.map(function(d) { return {text: d, size: (freqMap[d] * 5), color: [0, 0, 0]}; }))
+  .words(myWords.map(function(d) { return {text: d, size: Math.pow(freqMap[d] * 2, 2), color: [0, 0, 0]}; }))
   .padding(3)
   .fontSize(function(d) {return d.size})
   .font("Comic Sans MS")
@@ -425,7 +433,7 @@ function draw(words) {
         .data(words)
       .enter().append("text")
         .style("font-size", function(d) {return d.size + "px"})
-        .style("font-family", "Comic Sans MS")
+        .style("font-family", "Arial")
         .style("fill", function(d) {return "rgb("+d.color[0]+","+d.color[1]+","+d.color[2]+")"})
         .attr("text-anchor", "middle")
         .attr("transform", function(d) {
@@ -679,7 +687,7 @@ for(i = 0; i < selectedData.length; i++)
 tempColors = []
 for(i = 0; i < keys.length; i++)
 {
-  tempColors.push("rgba("+ Math.round(Math.random()*128+128)+","+Math.round(Math.random()*128+128)+","+Math.round(Math.random()*128+128)+",.9)")
+  tempColors.push("rgba("+ Math.round(Math.random()*128+64)+","+Math.round(Math.random()*128+64)+","+Math.round(Math.random()*128+64)+",.9)")
 }
   // Add X axis
   x = d3.scaleTime()

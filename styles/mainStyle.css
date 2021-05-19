@@ -12,9 +12,9 @@ button
 #tooltip
 {
   display: block;
-  height: 100%;
-  color: rgba(0,0,0,0);
+  height: 50vh;
   background-color: rgba(0,0,0,0);
+  margin-top: -15px;
 }
 
 #tooltip:hover.lightmode
@@ -32,16 +32,38 @@ button
 #temporal
 {
   background-image: url("./temporalImg.png");
+  height: 50vh;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+#tooltip p
+{
+  padding: 10px;
+  padding-top: 45vh;
 }
 
 #geographical
 {
   background-image: url("./geographicalImg.png");
+  height: 50vh;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 #textual
 {
   background-image: url("./textualImg.png");
+  height: 50vh;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+#shamelessplug
+{
+  font-size: 10px;
+  position: absolute;
+  bottom: 10px;
 }
 
 .wrapper
